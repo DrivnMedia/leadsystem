@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LeadFlow CRM</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0d0d10;color:#e8e6f0;font-family:'Segoe UI',system-ui,sans-serif}
+:root{
+--bg:#0d0d10;--bg2:#141417;--bg3:#1c1c21;--bg4:#242429;--bg5:#2c2c33;
+--border:#2a2a32;--border2:#38383f;
+--text:#e8e6f0;--text2:#9896a8;--text3:#55546a;
+--accent:#7c6af7;--accent2:#a99df8;--adim:#1e1a3f;
+--green:#3dd68c;--gdim:#0f2d1f;
+--amber:#f5a62a;--red:#f25c5c;--rdim:#2d0f0f;
+--blue:#4aa3e8;--teal:#2dd4bf;
+--r:8px;--rl:12px;--rxl:16px
+}
+.app{display:flex;flex-direction:column;min-height:100vh}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 22px;display:flex;align-items:center;gap:16px;height:54px;flex-shrink:0;position:sticky;top:0;z-index:50}
+.logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.logo-icon{width:26px;height:26px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+nav{display:flex;gap:2px}
+.tab{padding:6px 15px;font-size:13px;border:1px solid transparent;border-radius:var(--r);background:none;color:var(--text3);cursor:pointer;font-family:inherit;font-weight:400;transition:all 0.15s}
+.tab:hover{color:var(--text2)}
+.tab.on{background:var(--bg4);border-color:var(--border);color:var(--text);font-weight:500}
+.srch{margin-left:auto;position:relative}
+.srch input{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px 7px 32px;font-size:13px;color:var(--text);font-family:inherit;width:210px;outline:none;transition:border-color 0.15s}
+.srch input:focus{border-color:var(--accent)}
+.srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none}
+.header-actions{display:flex;gap:8px;align-items:center}
+.add-btn{background:var(--accent);border:none;border-radius:var(--r);padding:8px 16px;font-size:13px;color:#fff;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap;transition:opacity 0.15s}
+.add-btn:hover{opacity:0.85}
+.icon-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 11px;font-size:12px;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s}
+.icon-btn:hover{color:var(--text);border-color:var(--border2)}
+main{flex:1;padding:20px 22px}
+.view{display:none}.view.on{display:block}
+.sync-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:12px;color:var(--text3)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.saving{background:var(--amber)}
+.sync-dot.err{background:var(--red)}
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;min-height:540px}
+.col{flex:0 0 215px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rxl);padding:12px;display:flex;flex-direction:column}
+.col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-left:6px}
+.col-badge{font-size:11px;padding:2px 8px;border-radius:20px;font-family:monospace;font-weight:600}
+.kcard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rl);padding:12px;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.kcard:hover{border-color:var(--border2);background:var(--bg4);transform:translateY(-1px)}
+.kcard-name{font-size:13px;font-weight:500;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kcard-phone{font-size:11px;color:var(--text3);margin-bottom:7px}
+.kcard-meta{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.kcard-vehicle{font-size:11px;color:var(--text2);background:var(--bg5);border-radius:4px;padding:2px 7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.kcard-owner{font-size:11px;color:var(--text3);flex-shrink:0}
+.kcard-svc{font-size:11px;color:var(--text3);margin-top:5px}
+.add-col-btn{margin-top:auto;padding:8px;border:1px dashed var(--border);border-radius:var(--r);background:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;width:100%;text-align:left;transition:all 0.15s}
+.add-col-btn:hover{border-color:var(--border2);color:var(--text2)}
+.toolbar{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.filt{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:13px;color:var(--text2);font-family:inherit;outline:none;cursor:pointer}
+.filt:focus{border-color:var(--accent)}
+.count-lbl{font-size:12px;color:var(--text3);margin-left:auto}
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead tr{background:var(--bg3)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--text2)}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer;transition:background 0.1s}
+tbody tr:hover td{background:var(--bg3)}
+.name-cell{display:flex;align-items:center;gap:10px}
+.av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:monospace}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid transparent}
+.s-New{background:#0a1e30;color:#4aa3e8;border-color:#4aa3e830}
+.s-Contacted{background:#1e1a3f;color:#a99df8;border-color:#a99df830}
+.s-Qualified{background:#0f2d1f;color:#3dd68c;border-color:#3dd68c30}
+.s-Proposal{background:#2e1e05;color:#f5a62a;border-color:#f5a62a30}
+.s-Won{background:#052420;color:#2dd4bf;border-color:#2dd4bf30}
+.s-Lost{background:#2d0f0f;color:#f25c5c;border-color:#f25c5c30}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:20px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px}
+.sc-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.sc-val{font-size:26px;font-weight:600;font-family:monospace}
+.sc-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px}
+.sec-title{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.fl-label{font-size:12px;color:var(--text2);width:80px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fl-track{flex:1;background:var(--bg4);border-radius:4px;height:18px;overflow:hidden}
+.fl-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;font-size:11px;font-weight:600;color:#fff}
+.fl-count{font-size:12px;color:var(--text3);width:20px;font-family:monospace}
+.act-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.act-item:last-child{border-bottom:none}
+.act-ico{width:22px;height:22px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);flex-shrink:0;margin-top:1px}
+.act-text{font-size:13px;color:var(--text)}
+.act-time{font-size:11px;color:var(--text3);margin-top:2px}
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:0.4}
+.empty-msg{font-size:14px;margin-bottom:6px;color:var(--text2)}
+.empty-sub{font-size:13px}
+.modal-overlay{background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;position:fixed;inset:0;z-index:200}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rxl);padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.modal h3{font-size:16px;font-weight:600;color:var(--text)}
+.modal-close{margin-left:auto;background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.fr{margin-bottom:13px}
+.fr.full{grid-column:span 2}
+.fr label{display:block;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.fr input,.fr select,.fr textarea{width:100%;padding:9px 11px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);color:var(--text);font-family:inherit;outline:none;transition:border-color 0.15s}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--accent)}
+.fr textarea{resize:vertical;min-height:60px}
+.move-stages{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px}
+.ms-btn{padding:4px 13px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all 0.15s}
+.ms-btn:hover{border-color:var(--border2);color:var(--text)}
+.ms-btn.on{background:var(--adim);border-color:var(--accent);color:var(--accent2)}
+.modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:8px;border-top:1px solid var(--border);padding-top:16px}
+.del-btn{padding:7px 13px;font-size:12px;border:1px solid var(--rdim);border-radius:var(--r);background:var(--rdim);color:var(--red);cursor:pointer;font-family:inherit}
+.del-btn:hover{background:#3d1212}
+.save-btn{padding:8px 18px;font-size:13px;border:none;border-radius:var(--r);background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;font-weight:500}
+.save-btn:hover{opacity:0.85}
+.cancel-btn{padding:8px 14px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.cancel-btn:hover{color:var(--text)}
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+.spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen p{font-size:13px;color:var(--text3)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;font-size:13px;color:var(--text);z-index:999;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <p>Loading your leads...</p>
+</div>
+
+<div class="app" style="display:none" id="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 11L5.5 7.5L8 10L12 5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      LeadFlow
+    </div>
+    <nav>
+      <button class="tab on" onclick="switchTab('pipeline',this)">Pipeline</button>
+      <button class="tab" onclick="switchTab('contacts',this)">Contacts</button>
+      <button class="tab" onclick="switchTab('analytics',this)">Analytics</button>
+    </nav>
+    <div class="srch">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="#55546a" stroke-width="1.5"/><path d="M9 9L12 12" stroke="#55546a" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input id="srch" placeholder="Search leads..." oninput="render()">
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="exportData()">Export</button>
+      <button class="icon-btn" onclick="document.getElementById('importFile').click()">Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="add-btn" onclick="openAdd()">+ Add Lead</button>
+    </div>
+  </header>
+  <main>
+    <div id="pipeline" class="view on"></div>
+    <div id="contacts" class="view"></div>
+    <div id="analytics" class="view"></div>
+  </main>
+</div>
+
+<div id="modal-root"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const BIN_ID  = '69e5f59b856a682189523e79';
+const API_KEY = '$2a$10$rOpj2XTI9sbOPeE7/jrSKuWg7YUr3sTV0AB9AyPUi6AAPTgQ19ddK';
+const BIN_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+const HEADERS = {'Content-Type':'application/json','X-Master-Key':API_KEY};
+
+const STAGES     = ['New','Contacted','Qualified','Proposal','Won','Lost'];
+const SCOLS      = {New:'#4aa3e8',Contacted:'#a99df8',Qualified:'#3dd68c',Proposal:'#f5a62a',Won:'#2dd4bf',Lost:'#f25c5c'};
+const SDIM       = {New:'#0a1e30',Contacted:'#1e1a3f',Qualified:'#0f2d1f',Proposal:'#2e1e05',Won:'#052420',Lost:'#2d0f0f'};
+const OWNERS     = ['Alex M.','Jordan B.','Riley K.','Sam T.'];
+const SOURCES    = ['Website','Referral','LinkedIn','Meta Ads','Google Ads','Cold Outreach','Trade Show','Email Campaign','Other'];
+const TIMEFRAMES = ['ASAP','1-2 weeks','1 month','2-3 months','3-6 months','6+ months'];
+const AVCOLS     = [['#1e1a3f','#a99df8'],['#0f2d1f','#3dd68c'],['#2e1e05','#f5a62a'],['#0a1e30','#4aa3e8'],['#052420','#2dd4bf'],['#2d0f0f','#f25c5c']];
+
+let leads    = [];
+let activity = [];
+let nextId   = 1;
+let curTab   = 'pipeline';
+let sort     = {k:'name',d:1};
+let saveTimer = null;
+let syncStatus = 'ok';
+
+async function loadFromCloud() {
+  try {
+    const res = await fetch(BIN_URL + '/latest', {headers:{'X-Master-Key':API_KEY}});
+    if (!res.ok) throw new Error('load failed');
+    const data = await res.json();
+    const rec  = data.record;
+    leads    = rec.leads    || [];
+    activity = rec.activity || [];
+    nextId   = rec.nextId   || (leads.length ? Math.max(...leads.map(l=>l.id))+1 : 1);
+    setSyncStatus('ok','Synced');
+  } catch(e) {
+    setSyncStatus('err','Could not reach cloud — using local backup');
+    try {
+      const local = localStorage.getItem('lf_backup');
+      if (local) { const d=JSON.parse(local); leads=d.leads||[]; activity=d.activity||[]; nextId=d.nextId||1; toast('Offline mode — local backup loaded'); }
+    } catch {}
+  }
+}
+
+async function saveToCloud() {
+  setSyncStatus('saving','Saving...');
+  const payload = {leads, activity, nextId};
+  localStorage.setItem('lf_backup', JSON.stringify(payload));
+  try {
+    const res = await fetch(BIN_URL, {method:'PUT', headers:HEADERS, body:JSON.stringify(payload)});
+    if (!res.ok) throw new Error('save failed');
+    setSyncStatus('ok','Saved');
+  } catch(e) {
+    setSyncStatus('err','Cloud save failed — saved locally');
+  }
+}
+
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveToCloud, 800); }
+
+function setSyncStatus(status, msg) {
+  syncStatus = status;
+  document.querySelectorAll('.sync-dot').forEach(d => d.className = 'sync-dot ' + status);
+  document.querySelectorAll('.sync-msg').forEach(el => el.textContent = msg);
+}
+
+function ini(name)  { return (name||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(); }
+function avc(name)  { const i=(name||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0)%AVCOLS.length; return AVCOLS[i]; }
+function nowStr()   { return new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function q()        { return (document.getElementById('srch').value||'').toLowerCase(); }
+function esc(s)     { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function addAct(text,icon) { activity.unshift({id:Date.now(),time:nowStr(),text,icon}); if(activity.length>50)activity.pop(); }
+function toast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2400); }
+
+function switchTab(tab,btn) {
+  curTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(tab).classList.add('on');
+  render();
+}
+
+function render() {
+  if      (curTab==='pipeline') renderPipeline();
+  else if (curTab==='contacts') renderContacts();
+  else                          renderAnalytics();
+}
+
+function syncBar() {
+  return `<div class="sync-bar"><div class="sync-dot ${syncStatus}"></div><span class="sync-msg">${syncStatus==='saving'?'Saving...':syncStatus==='err'?'Sync error':'Synced'}</span></div>`;
+}
+
+function renderPipeline() {
+  const sq = q();
+  const fl = leads.filter(l=>!sq||(l.name+l.phone+l.vehicle+l.service).toLowerCase().includes(sq));
+  if (!leads.length) {
+    document.getElementById('pipeline').innerHTML = syncBar()+`<div class="empty"><div class="empty-icon">o</div><div class="empty-msg">No leads yet</div><div class="empty-sub">Click + Add Lead to get started</div></div>`;
+    return;
+  }
+  document.getElementById('pipeline').innerHTML = syncBar()+`<div class="board">${STAGES.map(stage=>{
+    const cards=fl.filter(l=>l.stage===stage);
+    return `<div class="col">
+      <div class="col-head">
+        <div style="display:flex;align-items:center"><div class="col-dot" style="background:${SCOLS[stage]}"></div><span class="col-title" style="color:${SCOLS[stage]};margin-left:6px">${stage}</span></div>
+        <span class="col-badge" style="background:${SDIM[stage]};color:${SCOLS[stage]}">${cards.length}</span>
+      </div>
+      <div style="flex:1;overflow-y:auto">
+        ${!cards.length?'<div style="font-size:12px;color:var(--text3);text-align:center;padding:16px 0">Empty</div>':''}
+        ${cards.map(l=>{const[ab,af]=avc(l.name);return`<div class="kcard" onclick="openEdit(${l.id})">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div class="av" style="background:${ab};color:${af}">${ini(l.name)}</div>
+            <div style="min-width:0"><div class="kcard-name">${l.name}</div><div class="kcard-phone">${l.phone||''}</div></div>
+          </div>
+          <div class="kcard-meta"><span class="kcard-vehicle">${l.vehicle||'No vehicle'}</span><span class="kcard-owner">${(l.owner||'').split(' ')[0]}</span></div>
+          ${l.service?`<div class="kcard-svc">${l.service}${l.timeframe?' · '+l.timeframe:''}</div>`:''}
+        </div>`;}).join('')}
+      </div>
+      <button class="add-col-btn" onclick="openAdd('${stage}')">+ Add lead</button>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderContacts() {
+  const sq  = q();
+  const flt = document.getElementById('cflt')?document.getElementById('cflt').value:'';
+  const fl  = leads
+    .filter(l=>(!sq||(l.name+l.phone+l.vehicle+l.service+l.source).toLowerCase().includes(sq))&&(!flt||l.stage===flt))
+    .sort((a,b)=>{let av=a[sort.k]||'',bv=b[sort.k]||'';if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase()}return av<bv?-sort.d:av>bv?sort.d:0});
+  const col=(label,k,w)=>`<th style="width:${w}" onclick="sortBy('${k}')">${label}${sort.k===k?(sort.d===1?' up':' dn'):''}</th>`;
+  document.getElementById('contacts').innerHTML = syncBar()+`
+    <div class="toolbar">
+      <select class="filt" id="cflt" onchange="render()"><option value="">All stages</option>${STAGES.map(s=>`<option${s===flt?' selected':''}>${s}</option>`).join('')}</select>
+      <span class="count-lbl">${fl.length} of ${leads.length} leads</span>
+    </div>
+    <div class="tbl-wrap">
+      ${!leads.length
+        ?`<div class="empty"><div class="empty-icon">o</div><div class="empty-msg">No leads yet</div><div class="empty-sub">Click + Add Lead to get started</div></div>`
+        :`<table><thead><tr>${col('Name','name','22%')}${col('Phone','phone','14%')}${col('Vehicle','vehicle','17%')}${col('Service','service','13%')}${col('Timeframe','timeframe','12%')}${col('Source','source','12%')}<th style="width:10%">Stage</th></tr></thead>
+        <tbody>${!fl.length
+          ?`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text3)">No matches</td></tr>`
+          :fl.map(l=>{const[ab,af]=avc(l.name);return`<tr onclick="openEdit(${l.id})">
+            <td><div class="name-cell"><div class="av" style="background:${ab};color:${af}">${ini(l.name)}</div><span style="font-weight:500">${l.name}</span></div></td>
+            <td style="color:var(--text2)">${l.phone||'-'}</td>
+            <td style="color:var(--text2);font-size:12px">${l.vehicle||'-'}</td>
+            <td style="color:var(--text2);font-size:12px">${l.service||'-'}</td>
+            <td><span style="background:var(--bg4);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text2)">${l.timeframe||'-'}</span></td>
+            <td style="color:var(--text3);font-size:12px">${l.source||'-'}</td>
+            <td><span class="pill s-${l.stage}">${l.stage}</span></td>
+          </tr>`;}).join('')}</tbody></table>`}
+    </div>`;
+}
+
+function sortBy(k) { sort={k,d:sort.k===k?-sort.d:1}; render(); }
+
+function renderAnalytics() {
+  const won=leads.filter(l=>l.stage==='Won');
+  const active=leads.filter(l=>!['Won','Lost'].includes(l.stage));
+  const closed=leads.filter(l=>['Won','Lost'].includes(l.stage)).length;
+  const wr=closed?Math.round(won.length/closed*100):0;
+  const maxC=Math.max(...STAGES.map(s=>leads.filter(l=>l.stage===s).length),1);
+  const srcMap={};leads.forEach(l=>{if(l.source)srcMap[l.source]=(srcMap[l.source]||0)+1});
+  const topSrc=Object.entries(srcMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxSrc=topSrc.length?topSrc[0][1]:1;
+  document.getElementById('analytics').innerHTML = syncBar()+`
+    <div class="stats">
+      <div class="sc"><div class="sc-label">Total leads</div><div class="sc-val">${leads.length}</div></div>
+      <div class="sc"><div class="sc-label">Active pipeline</div><div class="sc-val" style="color:var(--blue)">${active.length}</div><div class="sc-sub">open deals</div></div>
+      <div class="sc"><div class="sc-label">Won</div><div class="sc-val" style="color:var(--green)">${won.length}</div></div>
+      <div class="sc"><div class="sc-label">Win rate</div><div class="sc-val" style="color:${wr>50?'var(--green)':'var(--amber)'}">${wr}%</div></div>
+    </div>
+    <div class="two-col">
+      <div class="panel"><div class="sec-title">Pipeline funnel</div>
+        ${!leads.length?'<div style="color:var(--text3);font-size:13px">No data yet</div>':STAGES.map(s=>{const c=leads.filter(l=>l.stage===s).length;const p=Math.round(c/maxC*100);return`<div class="funnel-row"><span class="fl-label">${s}</span><div class="fl-track"><div class="fl-bar" style="width:${p}%;background:${SCOLS[s]}">${c?c:''}</div></div><span class="fl-count">${c}</span></div>`;}).join('')}
+      </div>
+      <div class="panel"><div class="sec-title">Lead sources</div>
+        ${!topSrc.length?'<div style="color:var(--text3);font-size:13px">No data yet</div>':topSrc.map(([src,cnt])=>`<div class="funnel-row"><span class="fl-label">${src}</span><div class="fl-track"><div class="fl-bar" style="width:${Math.round(cnt/maxSrc*100)}%;background:var(--accent)">${cnt}</div></div><span class="fl-count">${cnt}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="panel"><div class="sec-title">Recent activity</div>
+      ${!activity.length?'<div style="color:var(--text3);font-size:13px">No activity yet</div>':activity.slice(0,10).map(a=>`<div class="act-item"><div class="act-ico">${a.icon}</div><div><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div></div>`).join('')}
+    </div>`;
+}
+
+function openAdd(stage)  { showModal(null, stage||'New'); }
+function openEdit(id)    { showModal(leads.find(l=>l.id===id)); }
+
+function showModal(lead, defaultStage) {
+  const isNew=!lead;
+  const d={name:'',phone:'',vehicle:'',service:'',timeframe:TIMEFRAMES[0],source:SOURCES[0],stage:defaultStage||'New',owner:OWNERS[0],notes:'',...(lead||{})};
+  const[ab,af]=avc(d.name||'N');
+  document.getElementById('modal-root').innerHTML=`
+    <div class="modal-overlay" onclick="overlayClose(event)"><div class="modal">
+      <div class="modal-head">
+        ${!isNew?`<div class="av" style="background:${ab};color:${af};width:34px;height:34px;font-size:12px">${ini(d.name)}</div>`:''}
+        <h3>${isNew?'Add new lead':d.name}</h3>
+        <button class="modal-close" onclick="closeModal()">x</button>
+      </div>
+      <div class="form-grid">
+        <div class="fr full"><label>Full name *</label><input id="f-name" value="${esc(d.name)}" placeholder="First Last" oninput="liveAvatar()"></div>
+        <div class="fr"><label>Phone</label><input id="f-phone" value="${esc(d.phone)}" placeholder="555-000-0000"></div>
+        <div class="fr"><label>Stage</label><select id="f-stage">${STAGES.map(s=>`<option${s===d.stage?' selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="fr"><label>Vehicle</label><input id="f-vehicle" value="${esc(d.vehicle)}" placeholder="2023 BMW X5"></div>
+        <div class="fr"><label>Service</label><input id="f-service" value="${esc(d.service)}" placeholder="Detail, Ceramic, Tint..."></div>
+        <div class="fr"><label>Timeframe</label><select id="f-timeframe">${TIMEFRAMES.map(t=>`<option${t===d.timeframe?' selected':''}>${t}</option>`).join('')}</select></div>
+        <div class="fr"><label>Source</label><select id="f-source">${SOURCES.map(s=>`<option${s===d.source?' selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="fr"><label>Owner</label><select id="f-owner">${OWNERS.map(o=>`<option${o===d.owner?' selected':''}>${o}</option>`).join('')}</select></div>
+        <div class="fr full"><label>Notes</label><textarea id="f-notes" placeholder="Next steps, context...">${esc(d.notes)}</textarea></div>
+      </div>
+      ${!isNew?`<div class="sec-title" style="margin-top:4px">Move stage</div><div class="move-stages">${STAGES.map(s=>`<button class="ms-btn${s===d.stage?' on':''}" onclick="quickMove(${d.id},'${s}',this)">${s}</button>`).join('')}</div>`:''}
+      <div class="modal-actions">
+        ${!isNew?`<button class="del-btn" onclick="deleteLead(${d.id})">Delete lead</button>`:'<span></span>'}
+        <div style="display:flex;gap:8px">
+          <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <button class="save-btn" onclick="saveLead(${isNew?'null':d.id})">${isNew?'Add Lead':'Save Changes'}</button>
+        </div>
+      </div>
+    </div></div>`;
+}
+
+function liveAvatar() {
+  const name=document.getElementById('f-name').value;
+  const av=document.querySelector('.modal-head .av');
+  if(av){const[ab,af]=avc(name);av.style.background=ab;av.style.color=af;av.textContent=ini(name||'?');}
+}
+function overlayClose(e) { if(e.target.classList.contains('modal-overlay')) closeModal(); }
+function closeModal()    { document.getElementById('modal-root').innerHTML=''; }
+
+function saveLead(id) {
+  const name=(document.getElementById('f-name').value||'').trim();
+  if(!name){alert('Name is required.');return;}
+  const data={name,phone:document.getElementById('f-phone').value.trim(),vehicle:document.getElementById('f-vehicle').value.trim(),service:document.getElementById('f-service').value.trim(),timeframe:document.getElementById('f-timeframe').value,source:document.getElementById('f-source').value,stage:document.getElementById('f-stage').value,owner:document.getElementById('f-owner').value,notes:document.getElementById('f-notes').value.trim()};
+  if(id&&id!=='null'){
+    const idx=leads.findIndex(l=>l.id===id);
+    if(idx!==-1) leads[idx]={...leads[idx],...data};
+    addAct(name+' updated','e');
+    toast('Saved');
+  } else {
+    leads.push({id:nextId++,...data,created:new Date().toISOString().split('T')[0]});
+    addAct(name+' added as new lead','+');
+    toast('Lead added');
+  }
+  scheduleSave(); closeModal(); render();
+}
+
+function quickMove(id,stage,btn) {
+  const l=leads.find(x=>x.id===id); if(!l||l.stage===stage) return;
+  const old=l.stage; l.stage=stage;
+  addAct(l.name+' moved '+old+' to '+stage,'->');
+  scheduleSave();
+  document.querySelectorAll('.ms-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  render(); toast('Moved to '+stage);
+}
+
+function deleteLead(id) {
+  if(!confirm('Delete this lead? This cannot be undone.')) return;
+  const l=leads.find(x=>x.id===id);
+  if(l) addAct(l.name+' deleted','x');
+  leads=leads.filter(x=>x.id!==id);
+  scheduleSave(); closeModal(); render(); toast('Lead deleted');
+}
+
+function exportData() {
+  const blob=new Blob([JSON.stringify({leads,activity,nextId},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='leadflow-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Backup downloaded');
+}
+
+function importData(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const d=JSON.parse(ev.target.result);
+      if(!Array.isArray(d.leads)) throw new Error('invalid');
+      if(!confirm('Import '+d.leads.length+' leads? New leads will be merged in.')) return;
+      const existing=new Set(leads.map(l=>l.id));
+      let added=0;
+      d.leads.forEach(l=>{if(!existing.has(l.id)){leads.push(l);added++;}});
+      nextId=Math.max(nextId,...leads.map(l=>l.id))+1;
+      addAct('Imported '+added+' leads','+');
+      scheduleSave(); render(); toast('Imported '+added+' leads');
+    } catch { alert('Invalid backup file.'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+(async()=>{
+  await loadFromCloud();
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+  render();
+})();
+</script>
+</body>
+</html>
